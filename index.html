@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Show Magnifique — Social Media Calendar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --crimson: #B01020;
+    --gold: #D4AF60;
+    --gold-light: #F5E9C8;
+    --ivory: #FAF6EE;
+    --dark: #0d0008;
+    --dark2: #1a0010;
+    --mid: #2a0018;
+    --text: #3a2030;
+    --muted: #7a5060;
+    --phase1: #B01020;
+    --phase2: #C8921A;
+    --phase3: #7B2D8B;
+    --phase4: #0f7a3a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--ivory);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--dark);
+    padding: 36px 40px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(212,175,96,0.05) 18px, rgba(212,175,96,0.05) 19px);
+  }
+  .header-inner { position: relative; max-width: 1200px; margin: 0 auto; }
+  .header-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 5px;
+    color: var(--gold); margin-bottom: 10px;
+  }
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 4vw, 52px);
+    font-weight: 900; color: var(--gold-light);
+    line-height: 1.1; margin-bottom: 6px;
+  }
+  .header-title em { color: var(--gold); font-style: italic; }
+  .header-sub {
+    font-size: 13px; color: rgba(245,233,200,0.55);
+    letter-spacing: 1px;
+  }
+  .header-meta {
+    display: flex; gap: 24px; margin-top: 20px; flex-wrap: wrap;
+  }
+  .header-pill {
+    background: rgba(212,175,96,0.12);
+    border: 1px solid rgba(212,175,96,0.3);
+    padding: 6px 14px; border-radius: 20px;
+    font-size: 11px; color: var(--gold);
+    font-family: 'Cinzel', serif; letter-spacing: 2px;
+  }
+
+  /* LEGEND */
+  .legend {
+    background: white;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 16px 40px;
+  }
+  .legend-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  }
+  .legend-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 2px;
+    color: var(--muted); text-transform: uppercase; margin-right: 8px;
+  }
+  .leg-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 4px;
+    font-size: 11px; font-weight: 500; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .leg-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* PHASE TABS */
+  .phase-tabs {
+    background: white; padding: 0 40px;
+    border-bottom: 2px solid rgba(0,0,0,0.06);
+    display: flex; gap: 0; max-width: 1200px; margin: 0 auto;
+  }
+  .phase-wrap { max-width: 1200px; margin: 0 auto; background: white; padding: 0 40px; border-bottom: 2px solid rgba(0,0,0,0.06); display:flex; }
+  .phase-btn {
+    padding: 14px 20px; border: none; background: none;
+    font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 2px;
+    color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent;
+    transition: all 0.2s; white-space: nowrap; margin-bottom: -2px;
+  }
+  .phase-btn.active { color: var(--crimson); border-bottom-color: var(--crimson); }
+  .phase-btn:hover:not(.active) { color: var(--text); }
+
+  /* MAIN */
+  .main { max-width: 1200px; margin: 0 auto; padding: 32px 40px 60px; }
+
+  /* WEEK HEADER */
+  .week-header {
+    display: flex; align-items: center; gap: 16px;
+    margin: 32px 0 16px;
+  }
+  .week-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px; letter-spacing: 3px;
+    color: var(--muted);
+  }
+  .week-phase-tag {
+    font-family: 'Cinzel', serif;
+    font-size: 9px; letter-spacing: 3px; padding: 4px 12px;
+    border-radius: 3px; color: white; font-weight: 600;
+  }
+  .week-line { flex: 1; height: 1px; background: rgba(0,0,0,0.1); }
+
+  /* DAY GRID */
+  .day-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  /* POST CARD */
+  .post-card {
+    background: white;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.07);
+    overflow: hidden;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .post-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.1); transform: translateY(-2px); }
+
+  .card-phase-bar { height: 3px; }
+
+  .card-top {
+    padding: 14px 16px 10px;
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .card-date {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; letter-spacing: 2px; color: var(--muted);
+  }
+  .card-day {
+    font-weight: 700; font-size: 16px; color: var(--text);
+    font-family: 'Playfair Display', serif;
+  }
+  .card-platforms {
+    display: flex; gap: 4px;
+  }
+  .platform-badge {
+    font-size: 10px; padding: 2px 7px; border-radius: 3px;
+    font-weight: 600; letter-spacing: 0.5px;
+  }
+  .p-ig { background: #fff0f8; color: #c13584; border: 1px solid #f8c8e8; }
+  .p-tt { background: #f0fbff; color: #010101; border: 1px solid #c8ecf8; }
+  .p-fb { background: #f0f4ff; color: #1877f2; border: 1px solid #c8d8f8; }
+  .p-yt { background: #fff0f0; color: #ff0000; border: 1px solid #fcc8c8; }
+
+  .card-body { padding: 0 16px 14px; }
+
+  .post-type {
+    font-size: 9px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; margin-bottom: 6px;
+    display: inline-block; padding: 2px 0;
+  }
+
+  .post-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px; font-weight: 700; line-height: 1.35;
+    color: var(--dark); margin-bottom: 8px;
+  }
+
+  .post-caption {
+    font-size: 12px; line-height: 1.6; color: var(--muted);
+    margin-bottom: 10px;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  .post-tags {
+    display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px;
+  }
+  .post-tag {
+    font-size: 10px; color: var(--crimson); background: rgba(176,16,32,0.06);
+    padding: 2px 8px; border-radius: 3px;
+  }
+
+  .card-footer {
+    padding: 10px 16px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    display: flex; gap: 8px; align-items: center;
+  }
+  .content-type-icon { font-size: 14px; }
+  .content-type-label {
+    font-size: 10px; color: var(--muted); font-weight: 500;
+  }
+  .card-cta {
+    margin-left: auto; font-size: 10px; font-weight: 700;
+    letter-spacing: 1px; color: var(--crimson);
+    font-family: 'Cinzel', serif;
+  }
+
+  /* PHASE OVERVIEW BANNER */
+  .phase-banner {
+    border-radius: 10px; padding: 20px 24px; margin-bottom: 24px;
+    display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;
+  }
+  .phase-banner-icon { font-size: 32px; }
+  .phase-banner-body { flex: 1; min-width: 200px; }
+  .phase-banner-label {
+    font-family: 'Cinzel', serif; font-size: 9px;
+    letter-spacing: 4px; margin-bottom: 4px;
+  }
+  .phase-banner-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px; font-weight: 900; margin-bottom: 6px;
+  }
+  .phase-banner-desc { font-size: 12px; line-height: 1.7; opacity: 0.8; }
+  .phase-banner-stats {
+    display: flex; gap: 16px; flex-wrap: wrap;
+  }
+  .pbs { text-align: center; }
+  .pbs-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; font-weight: 900; display: block;
+  }
+  .pbs-lbl { font-size: 10px; opacity: 0.7; letter-spacing: 1px; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(13,0,8,0.7);
+    z-index: 999; display: flex; align-items: center; justify-content: center;
+    padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: white; border-radius: 14px; max-width: 560px; width: 100%;
+    max-height: 85vh; overflow-y: auto; transform: scale(0.95);
+    transition: transform 0.3s;
+  }
+  .modal-overlay.open .modal { transform: scale(1); }
+  .modal-top { height: 5px; border-radius: 14px 14px 0 0; }
+  .modal-header { padding: 24px 24px 0; }
+  .modal-eyebrow {
+    font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 4px;
+    color: var(--muted); margin-bottom: 8px;
+  }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; font-weight: 900; line-height: 1.3; margin-bottom: 6px;
+  }
+  .modal-body { padding: 16px 24px 24px; }
+  .modal-section { margin-bottom: 18px; }
+  .modal-section-label {
+    font-size: 9px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+  }
+  .modal-caption {
+    font-size: 13px; line-height: 1.8; color: var(--text);
+    background: var(--ivory); padding: 14px; border-radius: 8px;
+    white-space: pre-wrap;
+  }
+  .modal-hashtags {
+    font-size: 12px; color: var(--crimson);
+    line-height: 2; background: rgba(176,16,32,0.04);
+    padding: 10px 14px; border-radius: 8px;
+  }
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    background: rgba(0,0,0,0.08); border: none; border-radius: 50%;
+    width: 32px; height: 32px; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-platforms-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .visual-idea {
+    font-size: 12px; line-height: 1.7; color: var(--text);
+    padding: 12px 14px; background: #f8f4ff; border-radius: 8px;
+    border-left: 3px solid var(--phase3);
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px; background: rgba(0,0,0,0.08);
+    border-radius: 10px; overflow: hidden; margin-bottom: 32px;
+  }
+  .stat-cell {
+    background: white; padding: 18px 20px;
+  }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 900; color: var(--dark);
+  }
+  .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* HIDDEN */
+  .phase-section { display: none; }
+  .phase-section.visible { display: block; }
+
+  @media (max-width: 640px) {
+    .header, .legend, .main { padding-left: 20px; padding-right: 20px; }
+    .phase-wrap { padding: 0 20px; }
+    .day-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-eyebrow">✦ INTENSE OUD × PARIS CORNER ✦</div>
+    <div class="header-title">The Show <em>Magnifique</em><br/>Social Media Calendar</div>
+    <div class="header-sub">June 2026 · Chicago Launch Campaign</div>
+    <div class="header-meta">
+      <div class="header-pill">June 13–22 · Build Curiosity</div>
+      <div class="header-pill">June 20 · VIP Preview Night</div>
+      <div class="header-pill">June 21–22 · Grand Opening</div>
+      <div class="header-pill">Skokie + TAO Chicago</div>
+    </div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-inner">
+    <span class="legend-label">Phases:</span>
+    <div class="leg-item"><div class="leg-dot" style="background:#B01020"></div><span style="font-size:11px;color:#3a2030">🔴 Tease & Curiosity</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#C8921A"></div><span style="font-size:11px;color:#3a2030">🟡 Countdown & Reveal</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#7B2D8B"></div><span style="font-size:11px;color:#3a2030">🟣 Event Weekend LIVE</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#0f7a3a"></div><span style="font-size:11px;color:#3a2030">🟢 Post-Event Amplify</span></div>
+  </div>
+</div>
+
+<!-- PHASE TABS -->
+<div class="phase-wrap">
+  <button class="phase-btn active" onclick="showPhase('all', this)">ALL POSTS</button>
+  <button class="phase-btn" onclick="showPhase('phase1', this)">PHASE 1 · TEASE</button>
+  <button class="phase-btn" onclick="showPhase('phase2', this)">PHASE 2 · COUNTDOWN</button>
+  <button class="phase-btn" onclick="showPhase('phase3', this)">PHASE 3 · EVENT LIVE</button>
+  <button class="phase-btn" onclick="showPhase('phase4', this)">PHASE 4 · AMPLIFY</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat-cell"><div class="stat-num">28</div><div class="stat-lbl">Total Posts Planned</div></div>
+    <div class="stat-cell"><div class="stat-num">18</div><div class="stat-lbl">Days of Coverage</div></div>
+    <div class="stat-cell"><div class="stat-num">4</div><div class="stat-lbl">Platforms</div></div>
+    <div class="stat-cell"><div class="stat-num">75K+</div><div class="stat-lbl">Target Impressions</div></div>
+    <div class="stat-cell"><div class="stat-num">3</div><div class="stat-lbl">Event Days</div></div>
+  </div>
+
+  <!-- PHASE 1: TEASE & CURIOSITY — June 13–17 -->
+  <div class="phase-section visible" id="sec-phase1">
+    <div class="phase-banner" style="background:linear-gradient(135deg,#fff5f5,#fff);border:1px solid rgba(176,16,32,0.15);">
+      <div class="phase-banner-icon">🎪</div>
+      <div class="phase-banner-body">
+        <div class="phase-banner-label" style="color:#B01020">PHASE 1 · JUNE 13–17</div>
+        <div class="phase-banner-title" style="color:#B01020">Tease & Build Curiosity</div>
+        <div class="phase-banner-desc">The curtain hasn't risen yet. Drop cryptic clues about the location, the bottle, the scent. Let Chicago wonder what's coming. No full reveals — just enough to make them obsess.</div>
+      </div>
+      <div class="phase-banner-stats">
+        <div class="pbs"><span class="pbs-num" style="color:#B01020">9</span><span class="pbs-lbl">Posts</span></div>
+        <div class="pbs"><span class="pbs-num" style="color:#B01020">5</span><span class="pbs-lbl">Days</span></div>
+      </div>
+    </div>
+
+    <div class="week-header">
+      <span class="week-label">WEEK OF JUNE 13</span>
+      <span class="week-phase-tag" style="background:#B01020">ACT I · THE SECRET</span>
+      <div class="week-line"></div>
+    </div>
+
+    <div class="day-grid">
+
+      <div class="post-card" onclick="openModal('p1')">
+        <div class="card-phase-bar" style="background:#B01020"></div>
+        <div class="card-top">
+          <div><div class="card-date">FRIDAY</div><div class="card-day">June 13</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#B01020">🎭 TEASER · Reel / TikTok</div>
+          <div class="post-title">"Something is coming to Chicago. And it smells like nothing you've encountered."</div>
+          <div class="post-caption">Close-up of the red-and-gold striped bottle rotating in dramatic light. No name visible. Just the crown cap and stripes. Dramatic orchestral build in audio.</div>
+          <div class="post-tags"><span class="post-tag">#WhatIsThis</span><span class="post-tag">#ComingToChicago</span><span class="post-tag">#IntenseOud</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">🎬</span><span class="content-type-label">Short-form Video · 15s</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p2')">
+        <div class="card-phase-bar" style="background:#B01020"></div>
+        <div class="card-top">
+          <div><div class="card-date">SATURDAY</div><div class="card-day">June 14</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-fb">FB</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#B01020">🖼️ STATIC POST · Mystery</div>
+          <div class="post-title">"A fragrance is not just a scent. It's a world you step into."</div>
+          <div class="post-caption">Moody flat-lay: red velvet fabric, a single gold jester bell, the bottle silhouette half in shadow. No labels visible.</div>
+          <div class="post-tags"><span class="post-tag">#LuxuryFragrance</span><span class="post-tag">#TheShow</span><span class="post-tag">#ChicagoLuxury</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">📸</span><span class="content-type-label">Carousel · 3 slides</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p3')">
+        <div class="card-phase-bar" style="background:#B01020"></div>
+        <div class="card-top">
+          <div><div class="card-date">MONDAY</div><div class="card-day">June 16</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#B01020">🎠 REEL · "Guess the Notes"</div>
+          <div class="post-title">"If this scent were a place in Chicago… where would it be?"</div>
+          <div class="post-caption">Rapid-cut visual poem: closeup of strawberry, vanilla pod, white rose petals, a single gold coin — each morphing into iconic Chicago architecture frames. Drives engagement through comments.</div>
+          <div class="post-tags"><span class="post-tag">#GuessTheNotes</span><span class="post-tag">#ChicagoScent</span><span class="post-tag">#FragranceTok</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">🎬</span><span class="content-type-label">Reel · 20s</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p4')">
+        <div class="card-phase-bar" style="background:#B01020"></div>
+        <div class="card-top">
+          <div><div class="card-date">TUESDAY</div><div class="card-day">June 17</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span><span class="platform-badge p-fb">FB</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#B01020">🔐 STORY SERIES · Location Clue</div>
+          <div class="post-title">"The location is a secret. But here's your first clue: Red. Gold. A stage."</div>
+          <div class="post-caption">Instagram Stories poll: "Where is The Show happening?" with decoy options like "Navy Pier," "The Bean," vs. "Somewhere… magnificent." Drives saves and DMs.</div>
+          <div class="post-tags"><span class="post-tag">#WhereIsTheShow</span><span class="post-tag">#ParisCorner</span><span class="post-tag">#ChicagoEvents</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">📊</span><span class="content-type-label">Stories Poll · Interactive</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p5')">
+        <div class="card-phase-bar" style="background:#B01020"></div>
+        <div class="card-top">
+          <div><div class="card-date">WEDNESDAY</div><div class="card-day">June 18</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#B01020">🎥 BEHIND CURTAIN · Setup Tease</div>
+          <div class="post-title">"We can't show you what's inside. Yet."</div>
+          <div class="post-caption">10-second clip of red velvet curtains being pulled, a glimpse of gold archway, then cut to black. Text overlay: "June 20. Chicago." Pure FOMO engineering.</div>
+          <div class="post-tags"><span class="post-tag">#BehindTheCurtain</span><span class="post-tag">#June20</span><span class="post-tag">#IntenseOudChicago</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">🎬</span><span class="content-type-label">Short Reel · 10s</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PHASE 2: COUNTDOWN — June 18–20 -->
+  <div class="phase-section visible" id="sec-phase2">
+    <div class="phase-banner" style="background:linear-gradient(135deg,#fffbf0,#fff);border:1px solid rgba(200,146,26,0.2);">
+      <div class="phase-banner-icon">⏳</div>
+      <div class="phase-banner-body">
+        <div class="phase-banner-label" style="color:#C8921A">PHASE 2 · JUNE 18–20</div>
+        <div class="phase-banner-title" style="color:#C8921A">Countdown & Location Reveal</div>
+        <div class="phase-banner-desc">The show is about to begin. Reveal the location. Drop the full bottle name. Drive RSVPs and urgency. Build the VIP influencer wave for Friday preview night.</div>
+      </div>
+      <div class="phase-banner-stats">
+        <div class="pbs"><span class="pbs-num" style="color:#C8921A">8</span><span class="pbs-lbl">Posts</span></div>
+        <div class="pbs"><span class="pbs-num" style="color:#C8921A">3</span><span class="pbs-lbl">Days</span></div>
+      </div>
+    </div>
+
+    <div class="week-header">
+      <span class="week-label">JUNE 18 – 20</span>
+      <span class="week-phase-tag" style="background:#C8921A">ACT II · THE REVEAL</span>
+      <div class="week-line"></div>
+    </div>
+
+    <div class="day-grid">
+
+      <div class="post-card" onclick="openModal('p6')">
+        <div class="card-phase-bar" style="background:#C8921A"></div>
+        <div class="card-top">
+          <div><div class="card-date">THURSDAY</div><div class="card-day">June 19</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span><span class="platform-badge p-fb">FB</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#C8921A">🎭 BIG REVEAL · Name Drop</div>
+          <div class="post-title">"Introducing: THE SHOW MAGNIFIQUE by Paris Corner × Intense Oud"</div>
+          <div class="post-caption">First full reveal of the bottle, name, and event. Cinematic opener: curtain pulls back, spotlight hits the bottle, dramatic title card. Link in bio for RSVP. "The show opens tomorrow."</div>
+          <div class="post-tags"><span class="post-tag">#TheShowMagnifique</span><span class="post-tag">#IntenseOud</span><span class="post-tag">#ParisCorner</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">🎬</span><span class="content-type-label">Reel · 30s · HERO POST</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p7')">
+        <div class="card-phase-bar" style="background:#C8921A"></div>
+        <div class="card-top">
+          <div><div class="card-date">THURSDAY</div><div class="card-day">June 19</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#C8921A">📍 LOCATION REVEAL · Stories</div>
+          <div class="post-title">"The Stage is Set. Skokie Experience Center — This Weekend Only."</div>
+          <div class="post-caption">Instagram Stories sequence: swipe through 5 slides revealing the address, event hours (Fri VIP 5–8pm, Sat 11–8pm, Sun 12–7pm), and a "Save to Calendar" sticker.</div>
+          <div class="post-tags"><span class="post-tag">#SkokieChicago</span><span class="post-tag">#ChicagoWeekend</span><span class="post-tag">#LuxuryEvent</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">📍</span><span class="content-type-label">Stories Sequence · 5 slides</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p8')">
+        <div class="card-phase-bar" style="background:#C8921A"></div>
+        <div class="card-top">
+          <div><div class="card-date">THURSDAY</div><div class="card-day">June 19</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-fb">FB</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#C8921A">🌸 FRAGRANCE STORY · Notes Reveal</div>
+          <div class="post-title">"White florals. Strawberry crush. A cloud of sweet vanilla. This is what luxury smells like."</div>
+          <div class="post-caption">Beautiful carousel: each slide dedicated to one fragrance note — white floral garden, a strawberry on gold velvet, marshmallow cloud, final slide = bottle. Poetic copy for each note.</div>
+          <div class="post-tags"><span class="post-tag">#FragranceNotes</span><span class="post-tag">#TheShowMagnifique</span><span class="post-tag">#LuxuryPerfume</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">📸</span><span class="content-type-label">Carousel · 5 slides</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p9')">
+        <div class="card-phase-bar" style="background:#C8921A"></div>
+        <div class="card-top">
+          <div><div class="card-date">FRIDAY</div><div class="card-day">June 20 · Morning</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span><span class="platform-badge p-fb">FB</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#C8921A">🚨 LAUNCH DAY POST</div>
+          <div class="post-title">"Today. The curtain rises. The Show Magnifique is officially open in Chicago."</div>
+          <div class="post-caption">Morning hype post — the experience center decorated and ready. Wide shot of the space before doors open. Countdown: "VIP doors open in X hours." Share to Stories for maximum reach.</div>
+          <div class="post-tags"><span class="post-tag">#LaunchDay</span><span class="post-tag">#TheShowMagnifique</span><span class="post-tag">#ChicagoEvents</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">📢</span><span class="content-type-label">Feed Post + Story · Morning</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p10')">
+        <div class="card-phase-bar" style="background:#C8921A"></div>
+        <div class="card-top">
+          <div><div class="card-date">FRIDAY</div><div class="card-day">June 20 · Afternoon</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#C8921A">👑 VIP INFLUENCER · Preview Night</div>
+          <div class="post-title">"6 influencers. 1 night. Before the world gets in."</div>
+          <div class="post-caption">Post shared in early afternoon teasing the VIP preview. "Tonight, our partners step in first. Watch their Stories live from 5PM." Tag influencer handles. Drive their audiences to watch.</div>
+          <div class="post-tags"><span class="post-tag">#VIPPreview</span><span class="post-tag">#InfluencerNight</span><span class="post-tag">#TheShowMagnifique</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">👑</span><span class="content-type-label">Influencer Amplification</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PHASE 3: EVENT WEEKEND LIVE — June 20–22 -->
+  <div class="phase-section visible" id="sec-phase3">
+    <div class="phase-banner" style="background:linear-gradient(135deg,#fdf5ff,#fff);border:1px solid rgba(123,45,139,0.15);">
+      <div class="phase-banner-icon">🎪</div>
+      <div class="phase-banner-body">
+        <div class="phase-banner-label" style="color:#7B2D8B">PHASE 3 · JUNE 20–22</div>
+        <div class="phase-banner-title" style="color:#7B2D8B">The Show is LIVE</div>
+        <div class="phase-banner-desc">Real-time content from the floor. Zone reveals, crowd reactions, UGC reposts, live Stories coverage. The goal is to make people feel like they're missing the party of the year — and drive foot traffic for Day 2 & 3.</div>
+      </div>
+      <div class="phase-banner-stats">
+        <div class="pbs"><span class="pbs-num" style="color:#7B2D8B">8</span><span class="pbs-lbl">Posts</span></div>
+        <div class="pbs"><span class="pbs-num" style="color:#7B2D8B">3</span><span class="pbs-lbl">Days</span></div>
+      </div>
+    </div>
+
+    <div class="week-header">
+      <span class="week-label">JUNE 20–22 · WEEKEND</span>
+      <span class="week-phase-tag" style="background:#7B2D8B">ACT III · THE PERFORMANCE</span>
+      <div class="week-line"></div>
+    </div>
+
+    <div class="day-grid">
+
+      <div class="post-card" onclick="openModal('p11')">
+        <div class="card-phase-bar" style="background:#7B2D8B"></div>
+        <div class="card-top">
+          <div><div class="card-date">FRIDAY NIGHT</div><div class="card-day">June 20 · Live</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#7B2D8B">🔴 LIVE STORIES · VIP Night</div>
+          <div class="post-title">"Inside the velvet rope. VIP Preview is happening RIGHT NOW."</div>
+          <div class="post-caption">Real-time Stories from the VIP night. Show the 4 zones lit up, influencers receiving their bottles, the Masked Garden photo wall, the jester performers. Add "COME TOMORROW" CTA sticker.</div>
+          <div class="post-tags"><span class="post-tag">#InsideTheShow</span><span class="post-tag">#VIPNight</span><span class="post-tag">#TheShowMagnifique</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">🔴</span><span class="content-type-label">Live Stories · Ongoing</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p12')">
+        <div class="card-phase-bar" style="background:#7B2D8B"></div>
+        <div class="card-top">
+          <div><div class="card-date">SATURDAY</div><div class="card-day">June 21 · Morning</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span><span class="platform-badge p-fb">FB</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#7B2D8B">🎡 ZONE TOUR · Grand Opening</div>
+          <div class="post-title">"4 Zones. 1 Experience. The Show is officially open. Here's what awaits you."</div>
+          <div class="post-caption">Reel walking through each zone: Masked Garden → Game of Chance → Confectionery Lab → Hero Display. Voiceover or text overlays for each zone name. End card: address + hours.</div>
+          <div class="post-tags"><span class="post-tag">#GrandOpening</span><span class="post-tag">#4Zones</span><span class="post-tag">#ChicagoToday</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">🎬</span><span class="content-type-label">Zone Tour Reel · 45s</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p13')">
+        <div class="card-phase-bar" style="background:#7B2D8B"></div>
+        <div class="card-top">
+          <div><div class="card-date">SATURDAY</div><div class="card-day">June 21 · Afternoon</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#7B2D8B">😲 UGC REPOST · Crowd Reaction</div>
+          <div class="post-title">"Their faces said everything. Reposting the best moments from the floor."</div>
+          <div class="post-caption">Repost 3–5 UGC videos/photos from attendees already sharing. Add brand frame overlay. Stories sequence showing real guests at the Masked Garden & Confectionery Lab. Tag and thank them.</div>
+          <div class="post-tags"><span class="post-tag">#ShowMagnifiqueChicago</span><span class="post-tag">#UGC</span><span class="post-tag">#AsSeenAt</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">🔄</span><span class="content-type-label">UGC Repost · Stories</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p14')">
+        <div class="card-phase-bar" style="background:#7B2D8B"></div>
+        <div class="card-top">
+          <div><div class="card-date">SATURDAY</div><div class="card-day">June 21 · Evening</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#7B2D8B">🍬 CONFECTIONERY LAB · Sensory Post</div>
+          <div class="post-title">"Build your indulgence. Then wear it. Zone 3 is the most Instagrammable thing in Chicago right now."</div>
+          <div class="post-caption">Slow-motion video of marshmallow being dipped in strawberry sugar, rose petals falling, the lab in full atmosphere. Connection to fragrance notes voiced over: "This is what The Show smells like."</div>
+          <div class="post-tags"><span class="post-tag">#ConfectioneryLab</span><span class="post-tag">#SensoryExperience</span><span class="post-tag">#FragranceLaunch</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">🎬</span><span class="content-type-label">Slo-Mo Reel · 20s</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p15')">
+        <div class="card-phase-bar" style="background:#7B2D8B"></div>
+        <div class="card-top">
+          <div><div class="card-date">SUNDAY</div><div class="card-day">June 22 · Morning</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span><span class="platform-badge p-fb">FB</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#7B2D8B">⏰ LAST DAY URGENCY</div>
+          <div class="post-title">"Last day. Today only. The Show Magnifique closes tonight at 7PM."</div>
+          <div class="post-caption">Morning urgency post — highlight the spin-the-wheel prizes, remaining influencer drops, and limited giveaway bags. FOMO-driven. "What are you waiting for? Come now." with address + Google Maps link.</div>
+          <div class="post-tags"><span class="post-tag">#LastChance</span><span class="post-tag">#TodayOnly</span><span class="post-tag">#ChicagoSunday</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">⏰</span><span class="content-type-label">Urgency Feed Post</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p16')">
+        <div class="card-phase-bar" style="background:#7B2D8B"></div>
+        <div class="card-top">
+          <div><div class="card-date">SUNDAY</div><div class="card-day">June 22 · Closing</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#7B2D8B">🎭 CLOSING NIGHT · Emotional CTA</div>
+          <div class="post-title">"The curtain falls. But The Show Magnifique never ends."</div>
+          <div class="post-caption">End-of-day emotional post. Beautiful shot of the lit-up space as last guests leave. Bottle center frame. Caption: "Thank you Chicago. This was only Act One." Hints at future availability online.</div>
+          <div class="post-tags"><span class="post-tag">#ThankYouChicago</span><span class="post-tag">#ActOne</span><span class="post-tag">#IntenseOud</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">🎭</span><span class="content-type-label">Emotional Closer Post</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PHASE 4: POST-EVENT AMPLIFY — June 23–30 -->
+  <div class="phase-section visible" id="sec-phase4">
+    <div class="phase-banner" style="background:linear-gradient(135deg,#f0fff5,#fff);border:1px solid rgba(15,122,58,0.15);">
+      <div class="phase-banner-icon">✨</div>
+      <div class="phase-banner-body">
+        <div class="phase-banner-label" style="color:#0f7a3a">PHASE 4 · JUNE 23–30</div>
+        <div class="phase-banner-title" style="color:#0f7a3a">Post-Event Amplification</div>
+        <div class="phase-banner-desc">The show is over — but the story isn't. Repurpose the best moments, share professional photography, run the highlight reel, push online availability, and collect social proof before the month ends.</div>
+      </div>
+      <div class="phase-banner-stats">
+        <div class="pbs"><span class="pbs-num" style="color:#0f7a3a">6</span><span class="pbs-lbl">Posts</span></div>
+        <div class="pbs"><span class="pbs-num" style="color:#0f7a3a">8</span><span class="pbs-lbl">Days</span></div>
+      </div>
+    </div>
+
+    <div class="week-header">
+      <span class="week-label">JUNE 23–30</span>
+      <span class="week-phase-tag" style="background:#0f7a3a">ACT IV · THE ENCORE</span>
+      <div class="week-line"></div>
+    </div>
+
+    <div class="day-grid">
+
+      <div class="post-card" onclick="openModal('p17')">
+        <div class="card-phase-bar" style="background:#0f7a3a"></div>
+        <div class="card-top">
+          <div><div class="card-date">MONDAY</div><div class="card-day">June 23</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span><span class="platform-badge p-yt">YT</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#0f7a3a">🎬 HIGHLIGHT REEL · Event Recap</div>
+          <div class="post-title">"In case you missed it. Here's what The Show Magnifique looked like — in 60 seconds."</div>
+          <div class="post-caption">Professional highlight edit: best moments from all 3 days, crowd reactions, jester performances, confectionery lab, influencer faces, bottle in each zone. Cinematic music. "Get yours at the link in bio."</div>
+          <div class="post-tags"><span class="post-tag">#EventRecap</span><span class="post-tag">#TheShowMagnifique</span><span class="post-tag">#ICYMI</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">🎬</span><span class="content-type-label">Hero Recap Video · 60s</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p18')">
+        <div class="card-phase-bar" style="background:#0f7a3a"></div>
+        <div class="card-top">
+          <div><div class="card-date">TUESDAY</div><div class="card-day">June 24</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-fb">FB</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#0f7a3a">📸 GALLERY · Professional Shots</div>
+          <div class="post-title">"The moments that made the weekend. Our official event photography."</div>
+          <div class="post-caption">Carousel of the best professional photography from the event: hero bottle shots from each zone, crowd moments, the Confectionery Lab styled beautifully. Clean, luxury aesthetic. Save-worthy.</div>
+          <div class="post-tags"><span class="post-tag">#EventPhotography</span><span class="post-tag">#ParisCorner</span><span class="post-tag">#ChicagoStyle</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">📸</span><span class="content-type-label">Gallery Carousel · 10 slides</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p19')">
+        <div class="card-phase-bar" style="background:#0f7a3a"></div>
+        <div class="card-top">
+          <div><div class="card-date">WEDNESDAY</div><div class="card-day">June 25</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#0f7a3a">🗣️ TESTIMONIALS · Social Proof</div>
+          <div class="post-title">"What Chicago said about The Show Magnifique."</div>
+          <div class="post-caption">Compilation video: 5–7 quick guest testimonials from the event floor ("I've never smelled anything like this," "The bottle alone…"). Subtitled. Ends with bottle shot + where to buy CTA.</div>
+          <div class="post-tags"><span class="post-tag">#WhatTheySaid</span><span class="post-tag">#SocialProof</span><span class="post-tag">#TheShowMagnifique</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">💬</span><span class="content-type-label">Testimonial Compilation · 30s</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p20')">
+        <div class="card-phase-bar" style="background:#0f7a3a"></div>
+        <div class="card-top">
+          <div><div class="card-date">FRIDAY</div><div class="card-day">June 27</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span><span class="platform-badge p-fb">FB</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#0f7a3a">🛒 ONLINE AVAILABILITY · Shop CTA</div>
+          <div class="post-title">"You asked. You can now get The Show Magnifique online — delivered to your door."</div>
+          <div class="post-caption">Clean product shot of the bottle against gold-on-dark background. "The Show doesn't stop — it ships." Link to purchase. Urgency: "Limited run." Drives online sales from event awareness.</div>
+          <div class="post-tags"><span class="post-tag">#ShopNow</span><span class="post-tag">#LimitedEdition</span><span class="post-tag">#IntenseOud</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">🛒</span><span class="content-type-label">Product CTA Post</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p21')">
+        <div class="card-phase-bar" style="background:#0f7a3a"></div>
+        <div class="card-top">
+          <div><div class="card-date">SUNDAY</div><div class="card-day">June 29</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-fb">FB</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#0f7a3a">📖 BEHIND THE BRAND · Story</div>
+          <div class="post-title">"From Dubai to Chicago. The story behind Intense Oud and why this fragrance means everything."</div>
+          <div class="post-caption">Personal brand story post. The journey of bringing Middle Eastern luxury fragrance to Chicago. Authentic, human, cultural. Builds deep brand affinity beyond the event. Photo of the store / team.</div>
+          <div class="post-tags"><span class="post-tag">#OurStory</span><span class="post-tag">#IntenseOud</span><span class="post-tag">#DubaiToChicago</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">📖</span><span class="content-type-label">Brand Story Post</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+      <div class="post-card" onclick="openModal('p22')">
+        <div class="card-phase-bar" style="background:#0f7a3a"></div>
+        <div class="card-top">
+          <div><div class="card-date">MONDAY</div><div class="card-day">June 30</div></div>
+          <div class="card-platforms"><span class="platform-badge p-ig">IG</span><span class="platform-badge p-tt">TT</span><span class="platform-badge p-fb">FB</span></div>
+        </div>
+        <div class="card-body">
+          <div class="post-type" style="color:#0f7a3a">🎉 MONTH CLOSE · What's Next</div>
+          <div class="post-title">"June was just Act One. Something even bigger is in the works. Stay close."</div>
+          <div class="post-caption">End-of-month post: beautiful wrap image of the bottle, thank you to Chicago, tease of next chapter. "Follow to be the first to know." Builds audience for future activations.</div>
+          <div class="post-tags"><span class="post-tag">#ActTwo</span><span class="post-tag">#WhatsComing</span><span class="post-tag">#IntenseOud</span></div>
+        </div>
+        <div class="card-footer"><span class="content-type-icon">🔮</span><span class="content-type-label">Month-End Teaser Post</span><span class="card-cta">FULL BRIEF →</span></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-top" id="modalBar"></div>
+    <div style="position:relative">
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-header">
+      <div class="modal-eyebrow" id="mEyebrow"></div>
+      <div class="modal-title" id="mTitle"></div>
+      <div id="mPlatforms" class="card-platforms" style="margin-top:10px;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-label">Caption / Script</div>
+        <div class="modal-caption" id="mCaption"></div>
+      </div>
+      <div class="modal-section" id="mVisualSection">
+        <div class="modal-section-label">Visual Direction</div>
+        <div class="visual-idea" id="mVisual"></div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Hashtags</div>
+        <div class="modal-hashtags" id="mHashtags"></div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Content Format</div>
+        <div id="mFormat" style="font-size:13px;color:var(--text);"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const posts = {
+  p1: {
+    phase: 1, color: '#B01020',
+    eyebrow: 'PHASE 1 · JUNE 13 · TEASE — REEL / TIKTOK',
+    title: '"Something is coming to Chicago. And it smells like nothing you\'ve encountered."',
+    platforms: ['IG', 'TT'],
+    caption: `🎪 [NO TEXT for first 3 seconds — just the bottle rotating in spotlight]
+
+Then: "Something is coming to Chicago."
+
+[cut to black]
+
+"And it smells like nothing you've ever encountered."
+
+[bottle appears again, crown cap glinting]
+
+"Stay close. The show begins soon."
+
+➡️ Save this post. You'll want to remember where you heard it first.
+
+#WhatIsThis #ComingToChicago #IntenseOud #FragranceTok #ChicagoStyle #LuxuryPerfume #ParisCorner`,
+    visual: 'Film on a black velvet surface with a single theatrical spotlight from above. Rotate the bottle slowly — the red and gold stripes should catch the light in a slow 360°. No music for the first 2 seconds, then dramatic orchestral swell. DO NOT show the full name label — keep it mysterious. 15 seconds max.',
+    hashtags: '#WhatIsThis #ComingToChicago #IntenseOud #FragranceTok #ChicagoStyle #LuxuryPerfume #ParisCorner #TheShow #NewFragrance',
+    format: '🎬 Short-form Video (Reel / TikTok) · 15 seconds · Post at 7PM Friday'
+  },
+  p2: {
+    phase: 1, color: '#B01020',
+    eyebrow: 'PHASE 1 · JUNE 14 · MYSTERY STATIC POST',
+    title: '"A fragrance is not just a scent. It\'s a world you step into."',
+    platforms: ['IG', 'FB'],
+    caption: `A fragrance is not just a scent.
+It's a world you step into.
+
+One of velvet curtains.
+Of carnival lights.
+Of something sweet, bold, and unforgettable.
+
+We're bringing that world to Chicago.
+
+Coming soon. 🔴✨
+
+#LuxuryFragrance #TheShow #ChicagoLuxury #IntenseOud #ParisCorner #FragranceLovers #PerfumeCommunity`,
+    visual: '3-slide carousel. Slide 1: Red velvet draped surface, a single jester bell in gold, the bottle silhouette half in shadow. Slide 2: Close-up of the gold crown cap only. Slide 3: Deep red-black background with only the word "SOON" in gold Cinzel font. No brand name visible on any slide.',
+    hashtags: '#LuxuryFragrance #TheShow #ChicagoLuxury #IntenseOud #ParisCorner #FragranceLovers #PerfumeCommunity #NicheFragrance',
+    format: '📸 Carousel · 3 Slides · Post at 12PM Saturday'
+  },
+  p3: {
+    phase: 1, color: '#B01020',
+    eyebrow: 'PHASE 1 · JUNE 16 · ENGAGEMENT REEL',
+    title: '"If this scent were a place in Chicago… where would it be?"',
+    platforms: ['IG', 'TT'],
+    caption: `If this fragrance were a place in Chicago…
+
+🌸 Would it be a garden in Lincoln Park?
+🍓 A patisserie in the West Loop?
+☁️ The clouds above the lakefront?
+
+Drop your answer below 👇
+
+(We'll tell you if you're warm…)
+
+The reveal is closer than you think.
+
+#GuessTheNotes #ChicagoScent #FragranceTok #WhatAmI #IntenseOud #FragranceCommunity`,
+    visual: 'Rapid-cut visual poem — 1 second each: strawberry on gold velvet → vanilla pod steaming → white rose petals falling → gold coin spinning → cut to Chicago skyline silhouette. All shots very cinematic, slow motion. The final frame is just the mystery bottle silhouette. Drive comments by asking the question in the caption.',
+    hashtags: '#GuessTheNotes #ChicagoScent #FragranceTok #WhatAmI #IntenseOud #FragranceCommunity #PerfumeTok #NewPerfume',
+    format: '🎬 Engagement Reel · 20 seconds · Post at 6PM Monday'
+  },
+  p4: {
+    phase: 1, color: '#B01020',
+    eyebrow: 'PHASE 1 · JUNE 17 · STORIES POLL',
+    title: '"The location is a secret. But here\'s your first clue: Red. Gold. A stage."',
+    platforms: ['IG', 'TT', 'FB'],
+    caption: `📍 STORY 1: "The Show is coming to Chicago. We can't tell you where yet. But here's your first clue:"
+
+📍 STORY 2: [Text on crimson background] "RED. GOLD. A STAGE."
+
+📍 STORY 3: POLL — "Where is The Show happening?"
+Options: 🅐 Navy Pier  🅑 Millennium Park  🅒 Somewhere… Magnificent  🅓 My neighborhood please
+
+📍 STORY 4: "DM us your guess. The person who gets it right gets early access. 👀"
+
+📍 STORY 5: "The reveal is in 2 days. Stay close. 🔴"`,
+    visual: 'All Stories on deep crimson or black backgrounds with gold text. Use the brand color palette throughout. The poll story should have the Intense Oud logo small in the corner. Add "countdown" sticker to final story set to June 19.',
+    hashtags: '#WhereIsTheShow #ParisCorner #ChicagoEvents #FragranceLaunch #IntenseOud #ComingSoon',
+    format: '📊 Instagram Stories Sequence · 5 Stories · Post at 8PM Tuesday'
+  },
+  p5: {
+    phase: 1, color: '#B01020',
+    eyebrow: 'PHASE 1 · JUNE 18 · BEHIND CURTAIN TEASE',
+    title: '"We can\'t show you what\'s inside. Yet."',
+    platforms: ['IG', 'TT'],
+    caption: `We've been building something.
+
+Something red. Something gold. Something theatrical.
+
+And we can't show you yet.
+
+But we can tell you this:
+Chicago has never seen anything like it.
+
+Two days. ⏳
+
+#BehindTheCurtain #June20 #IntenseOudChicago #TheShowMagnifique #ComingSoon`,
+    visual: '10-second clip: hands pulling red velvet curtains apart from behind, a glimpse of gold archway and theatrical lighting — then SNAP cut to black. White text fades in: "JUNE 20. CHICAGO." followed by "The Show Magnifique" in gold. Pure cinematic tease. No zone or product visible.',
+    hashtags: '#BehindTheCurtain #June20 #IntenseOudChicago #TheShowMagnifique #ComingSoon #ChicagoStyle',
+    format: '🎬 Short Reel · 10 seconds · Post at 7PM Wednesday'
+  },
+  p6: {
+    phase: 2, color: '#C8921A',
+    eyebrow: 'PHASE 2 · JUNE 19 · BIG REVEAL — HERO POST',
+    title: '"Introducing: THE SHOW MAGNIFIQUE by Paris Corner × Intense Oud"',
+    platforms: ['IG', 'TT', 'FB'],
+    caption: `The curtain rises.
+
+Introducing THE SHOW MAGNIFIQUE —
+a fragrance that feels like the show is about to begin.
+
+Sweet, bold, and impossible to ignore.
+
+A luxury carnival-inspired experience unlike anything Chicago has ever seen.
+
+📍 Skokie Experience Center
+🗓 Friday June 20 → Sunday June 22
+🎟 VIP Preview Tonight · 5PM–8PM (Influencer spots only)
+🎪 Grand Opening Saturday · 11AM–8PM
+🎪 Extended Hours Sunday · 12PM–7PM
+
+FREE ENTRY. Limited giveaways. Live jesters. 4 experiential zones.
+
+"Step into the show. Wear the magic." ✨
+
+#TheShowMagnifique #IntenseOud #ParisCorner #ChicagoEvents #FragranceLaunch #LuxuryEvent #ChicagoWeekend`,
+    visual: 'Cinematic 30-second reveal reel. Opens with the velvet curtain parting, light floods in, and the bottle appears center-frame in a theatrical spotlight on a carousel-inspired pedestal. Dramatic music builds to a crescendo. Text cards appear: THE SHOW MAGNIFIQUE / PARIS CORNER / THIS WEEKEND. End frame has the address, dates, and hours. This is your most important video — make it feel like a movie trailer.',
+    hashtags: '#TheShowMagnifique #IntenseOud #ParisCorner #ChicagoEvents #FragranceLaunch #LuxuryEvent #ChicagoWeekend #GrandOpening #Chicago',
+    format: '🎬 Hero Reveal Reel · 30s · Post at 12PM Thursday June 19 · BOOST THIS POST'
+  },
+  p7: {
+    phase: 2, color: '#C8921A',
+    eyebrow: 'PHASE 2 · JUNE 19 · STORIES — LOCATION REVEAL',
+    title: '"The Stage is Set. Skokie Experience Center — This Weekend Only."',
+    platforms: ['IG'],
+    caption: `📍 STORY 1: "We promised you the location. Here it is."
+
+📍 STORY 2: [Map pin + address] "Skokie Experience Center, Chicago Area. THIS WEEKEND."
+
+📍 STORY 3: "FRIDAY: VIP Influencer Preview — 5PM to 8PM"
+"SATURDAY: Grand Opening — 11AM to 8PM (FREE ENTRY)"
+"SUNDAY: Extended Hours — 12PM to 7PM (FREE ENTRY)"
+
+📍 STORY 4: [Save to Calendar sticker] "Don't miss it. Add to your calendar right now."
+
+📍 STORY 5: "Tag someone who needs to experience this with you. 👇"`,
+    visual: 'Clean Stories with gold text on crimson background. Story 2 should use the Google Maps screenshot with a gold pin overlay. Story 4 must include the native "Calendar" sticker. Story 5 should have a "Tag a friend" sticker to drive sharing.',
+    hashtags: '#SkokieChicago #ChicagoWeekend #LuxuryEvent #FreeEvent #ChicagoThingsToDo #TheShowMagnifique',
+    format: '📍 Stories Sequence · 5 Stories · Post at 3PM Thursday June 19'
+  },
+  p8: {
+    phase: 2, color: '#C8921A',
+    eyebrow: 'PHASE 2 · JUNE 19 · FRAGRANCE CAROUSEL',
+    title: '"White florals. Strawberry crush. A cloud of sweet vanilla. This is what luxury smells like."',
+    platforms: ['IG', 'FB'],
+    caption: `Some fragrances tell a story.
+This one performs it.
+
+🌸 SLIDE 2: WHITE FLORAL HEART
+"Garden in bloom. Theatrical. Feminine. Timeless."
+
+🍓 SLIDE 3: STRAWBERRY CRUSH
+"Bold. Playful. The unexpected star of the show."
+
+☁️ SLIDE 4: SWEET CLOUD
+"Vanilla warmth. Marshmallow softness. The sillage that lingers."
+
+✨ SLIDE 5: THE SHOW MAGNIFIQUE
+"All of this — in one bottle. One experience. This weekend, Chicago."
+
+Come smell it yourself. Free entry. This weekend only.
+
+#FragranceNotes #TheShowMagnifique #LuxuryPerfume #ParisCorner #IntenseOud #PerfumeCommunity`,
+    visual: 'Slide 1: Full bottle reveal on ivory background. Slide 2: White garden, soft light, jasmine/rose. Slide 3: Strawberry on gold velvet, dramatic red light. Slide 4: Vanilla pod + marshmallow cloud imagery, warm cream tones. Slide 5: Hero bottle on stage in spotlight, full event CTA. Each slide has 1 line of poetry-style copy in Playfair Display font.',
+    hashtags: '#FragranceNotes #TheShowMagnifique #LuxuryPerfume #ParisCorner #IntenseOud #PerfumeCommunity #ScentProfile #WhiteFloral',
+    format: '📸 Carousel · 5 Slides · Post at 6PM Thursday June 19'
+  },
+  p9: {
+    phase: 2, color: '#C8921A',
+    eyebrow: 'PHASE 2 · JUNE 20 · LAUNCH DAY MORNING',
+    title: '"Today. The curtain rises. The Show Magnifique is officially open in Chicago."',
+    platforms: ['IG', 'TT', 'FB'],
+    caption: `TODAY IS THE DAY. 🎪
+
+The Show Magnifique is officially open.
+
+📍 Skokie Experience Center
+🎟 VIP Preview TONIGHT · 5PM–8PM (Influencers Only)
+🎪 GRAND OPENING Tomorrow · Saturday June 21 · 11AM–8PM
+
+4 experiential zones.
+Live jester performers.
+Carnival-inspired luxury.
+A fragrance that changes how you think about scent.
+
+FREE ENTRY. Limited giveaway bags while they last.
+
+Chicago — come find us. The show has begun. 🔴✨
+
+#LaunchDay #TheShowMagnifique #ChicagoEvents #IntenseOud #GrandOpening`,
+    visual: 'Wide shot of the fully decorated experience center before doors open — gold archway, red velvet draping, theatrical lighting. The space should look magical and theatrical. The bottle sits center stage on its carousel display. Share to Stories with a "WE ARE OPEN" sticker in gold.',
+    hashtags: '#LaunchDay #TheShowMagnifique #ChicagoEvents #IntenseOud #GrandOpening #ChicagoWeekend #NowOpen #LuxuryExperience',
+    format: '📢 Feed Post + Stories · Post at 9AM Friday June 20'
+  },
+  p10: {
+    phase: 2, color: '#C8921A',
+    eyebrow: 'PHASE 2 · JUNE 20 · VIP INFLUENCER ANNOUNCEMENT',
+    title: '"6 influencers. 1 night. Before the world gets in."',
+    platforms: ['IG'],
+    caption: `Tonight, before the public arrives —
+we open the velvet rope for 6 very special guests.
+
+Our VIP influencer partners get first access.
+First in the zones. First with the bottle. First in the light.
+
+Watch their Stories LIVE from 5PM tonight.
+
+[TAG INFLUENCER HANDLES]
+
+The public doors open TOMORROW — Saturday, 11AM. Free entry.
+
+Don't miss it. ✨
+
+#VIPPreview #InfluencerNight #TheShowMagnifique #WatchLive`,
+    visual: 'A graphic or styled flat-lay showing 6 VIP invitation cards fanned out on red velvet with gold foil text. Or a stylized "VIP" graphic with the influencer handles. If you have headshots from the influencers, use a clean grid format.',
+    hashtags: '#VIPPreview #InfluencerNight #TheShowMagnifique #WatchLive #BehindTheVelvetRope #ParisCorner',
+    format: '👑 Feed Post · Post at 2PM Friday June 20'
+  },
+  p11: {
+    phase: 3, color: '#7B2D8B',
+    eyebrow: 'PHASE 3 · JUNE 20 EVENING · LIVE STORIES',
+    title: '"Inside the velvet rope. VIP Preview is happening RIGHT NOW."',
+    platforms: ['IG', 'TT'],
+    caption: `📸 STORY 1: "WE ARE LIVE. VIP night has officially begun. 🔴"
+
+📸 STORY 2: Zone 1 — The Masked Garden. Gold carnival masks. Striped backdrop. The photo moment of the year.
+
+📸 STORY 3: Zone 3 — The Confectionery Lab. Watch guests dip marshmallows into strawberry sugar. Scent and sensation together.
+
+📸 STORY 4: Our influencer partners receiving their complimentary bottles. Faces of pure joy.
+
+📸 STORY 5: The roaming jester performers. Because The Show Magnifique is exactly that — a show.
+
+📸 STORY 6: CTA — "Public doors open TOMORROW at 11AM. Skokie Experience Center. See you there? 🎪"`,
+    visual: 'Raw, real, energy-packed Stories. No heavy editing needed — just great framing. Use the ambient circus soundscape as audio on videos. Add "COME TOMORROW" and "FREE ENTRY" sticker CTAs. Keep posting every 30–45 minutes throughout the VIP night.',
+    hashtags: '#InsideTheShow #VIPNight #TheShowMagnifique #ChicagoEvents #LiveNow #IntenseOud',
+    format: '🔴 Live Stories Series · Ongoing from 5PM–8PM Friday'
+  },
+  p12: {
+    phase: 3, color: '#7B2D8B',
+    eyebrow: 'PHASE 3 · JUNE 21 MORNING · ZONE TOUR REEL',
+    title: '"4 Zones. 1 Experience. The Show is officially open. Here\'s what awaits you."',
+    platforms: ['IG', 'TT', 'FB'],
+    caption: `The public doors are OPEN. 🎪
+
+Here's what's waiting for you inside The Show Magnifique:
+
+🌸 ZONE 1: THE MASKED GARDEN — Your TikTok moment.
+🎡 ZONE 2: GAME OF CHANCE — Spin the wheel. Win prizes.
+🍬 ZONE 3: THE CONFECTIONERY LAB — Eat your fragrance.
+👑 ZONE 4: THE HERO DISPLAY — Meet The Show Magnifique.
+
+📍 Skokie Experience Center
+🕐 TODAY: 11AM–8PM (FREE ENTRY)
+🎪 TOMORROW: 12PM–7PM (FREE ENTRY)
+
+See you inside. 🔴✨
+
+#GrandOpening #4Zones #ChicagoToday #TheShowMagnifique #IntenseOud`,
+    visual: 'Walking tour reel — enter through the gold archway, pan to Zone 1 backdrop, quick cut to Zone 2 spin wheel, Zone 3 confectionery cart, Zone 4 carousel display. 45 seconds. Cinematic but energetic. Add text overlays with zone names. End with wide shot of full space + address/hours.',
+    hashtags: '#GrandOpening #4Zones #ChicagoToday #TheShowMagnifique #IntenseOud #FreeEvent #ChicagoWeekend #ChicagoThingsToDo',
+    format: '🎬 Zone Tour Reel · 45 seconds · Post at 10AM Saturday June 21'
+  },
+  p13: {
+    phase: 3, color: '#7B2D8B',
+    eyebrow: 'PHASE 3 · JUNE 21 AFTERNOON · UGC REPOST',
+    title: '"Their faces said everything."',
+    platforms: ['IG', 'TT'],
+    caption: `We asked Chicago to come.
+Chicago came. And they had things to say. 👀
+
+[UGC reposts with credited handles]
+
+📍 Still open TODAY until 8PM
+📍 TOMORROW: Sunday, 12–7PM
+
+Come before the curtain falls. 🎪
+
+#ShowMagnifiqueChicago #AsSeenAt #TheShowMagnifique #ChicagoStyle`,
+    visual: 'Stories sequence of reposted UGC from guests. Add a consistent brand frame: thin gold border + small Intense Oud logo in corner. Each repost should tag the original creator. For feed, do a graphic split of 3–4 UGC images in a collage format with "What Chicago Said" as the overlay text.',
+    hashtags: '#ShowMagnifiqueChicago #AsSeenAt #TheShowMagnifique #ChicagoStyle #UGC #CustomerLove #FragranceCommunity',
+    format: '🔄 UGC Repost · Stories + Feed Collage · Post at 3PM Saturday'
+  },
+  p14: {
+    phase: 3, color: '#7B2D8B',
+    eyebrow: 'PHASE 3 · JUNE 21 EVENING · SENSORY REEL',
+    title: '"Build your indulgence. Then wear it."',
+    platforms: ['IG', 'TT'],
+    caption: `This is Zone 3.
+The Confectionery Lab.
+
+Vanilla. Strawberry. Rose.
+
+These aren't just flavors.
+They're the soul of The Show Magnifique — in fragrance form.
+
+Come build your indulgence. Then wear it. 🍬✨
+
+📍 Still open TOMORROW · Sunday · 12PM–7PM
+
+#ConfectioneryLab #SensoryExperience #FragranceLaunch #TheShowMagnifique #IntenseOud`,
+    visual: 'Slow-motion close-ups: marshmallow being rolled in strawberry sugar, rose petals falling in slow-mo, the vanilla dust jar catching the light. Audio: gentle ambient carnival music. Voice-over or text: "This is what The Show Magnifique smells like." End with the bottle in frame.',
+    hashtags: '#ConfectioneryLab #SensoryExperience #FragranceLaunch #TheShowMagnifique #IntenseOud #FoodAndFragrance #LuxuryExperience',
+    format: '🎬 Slo-Mo Reel · 20 seconds · Post at 7PM Saturday June 21'
+  },
+  p15: {
+    phase: 3, color: '#7B2D8B',
+    eyebrow: 'PHASE 3 · JUNE 22 MORNING · URGENCY POST',
+    title: '"Last day. Today only."',
+    platforms: ['IG', 'TT', 'FB'],
+    caption: `TODAY IS THE LAST DAY.
+
+The Show Magnifique closes tonight at 7PM.
+
+After that, the curtain falls.
+The zones disappear.
+The giveaway bags run out.
+
+📍 Skokie Experience Center
+🕐 TODAY ONLY: 12PM–7PM
+🎟 FREE ENTRY
+
+Don't be the person who says "I should have gone."
+Come now. Bring everyone. 🎪🔴
+
+#LastChance #TodayOnly #ChicagoSunday #TheShowMagnifique #FOMO`,
+    visual: 'Energetic urgency graphic: a "LAST DAY" banner in red and gold over an image of the packed experience center from Day 1. Or a simple crimson background with gold countdown-style typography. Share to Stories with a "Directions" sticker linking to the venue address.',
+    hashtags: '#LastChance #TodayOnly #ChicagoSunday #TheShowMagnifique #FOMO #ChicagoEvents #GoNow',
+    format: '📢 Urgency Feed Post · Post at 9AM Sunday June 22'
+  },
+  p16: {
+    phase: 3, color: '#7B2D8B',
+    eyebrow: 'PHASE 3 · JUNE 22 EVENING · EMOTIONAL CLOSE',
+    title: '"The curtain falls. But The Show Magnifique never ends."',
+    platforms: ['IG', 'TT'],
+    caption: `The curtain has fallen.
+The Show Magnifique — Chicago — is a wrap.
+
+To everyone who came:
+Thank you for being part of something extraordinary.
+
+To everyone who couldn't make it:
+This was only Act One.
+
+Something bigger is coming.
+Follow @IntenseOud to be first to know.
+
+The show doesn't end — it evolves. ✨
+
+#ThankYouChicago #ActOne #IntenseOud #TheShowMagnifique #WhatComesNext`,
+    visual: 'Beautiful twilight/evening shot of the experience center space as the last guests leave — the theatrical lighting is still on, the bottle is center stage. Bittersweet, cinematic. Could include a final wide angle of the empty decorated space post-event. The bottle should be perfectly lit.',
+    hashtags: '#ThankYouChicago #ActOne #IntenseOud #TheShowMagnifique #WhatComesNext #FragranceLaunch #ChicagoStyle',
+    format: '🎭 Emotional Closer Post · Post at 8PM Sunday June 22'
+  },
+  p17: {
+    phase: 4, color: '#0f7a3a',
+    eyebrow: 'PHASE 4 · JUNE 23 · HERO RECAP VIDEO',
+    title: '"In case you missed it — in 60 seconds."',
+    platforms: ['IG', 'TT', 'YT'],
+    caption: `In case you missed it.
+
+Here's everything that happened when The Show Magnifique came to Chicago — in 60 seconds.
+
+🌸 The Masked Garden
+🎡 The Game of Chance
+🍬 The Confectionery Lab
+👑 The Hero Display
+
+400+ visitors. 3 days. One unforgettable experience.
+
+And it's available at the link in bio. 🔴✨
+
+#EventRecap #TheShowMagnifique #ICYMI #IntenseOud #ChicagoEvents`,
+    visual: 'Professional highlight edit: best moments from all 3 days — crowd entering the gold archway, guests at the photo wall, spin wheel wins, confectionery lab slow-mo, jester performers, close-ups of the bottle. Cinematic music (suggest: orchestral/dramatic pop hybrid). End card: bottle hero shot + "Shop Now" CTA.',
+    hashtags: '#EventRecap #TheShowMagnifique #ICYMI #IntenseOud #ChicagoEvents #Highlights #PopupEvent #FragranceLaunch',
+    format: '🎬 Hero Recap Video · 60 seconds · Post at 12PM Monday June 23'
+  },
+  p18: {
+    phase: 4, color: '#0f7a3a',
+    eyebrow: 'PHASE 4 · JUNE 24 · PROFESSIONAL GALLERY',
+    title: '"The moments that made the weekend."',
+    platforms: ['IG', 'FB'],
+    caption: `Three days. Four zones. One extraordinary show.
+
+Swipe through our official event photography from The Show Magnifique Chicago. 📸
+
+Every image a memory. Every frame a reason you should have been there.
+
+The Show Magnifique fragrance by Paris Corner × Intense Oud — available now at the link in bio. ✨
+
+#EventPhotography #ParisCorner #ChicagoStyle #TheShowMagnifique #LuxuryFragrance`,
+    visual: '10-slide carousel of the best professional photography. Sequence: hero bottle in Zone 4 spotlight → Masked Garden photo wall → confectionery lab detail → crowd/atmosphere shots → jester performer → Zone 2 spin wheel → guest reactions → closing night space → bottle detail close-up → final "Available Now" slide with bottle.',
+    hashtags: '#EventPhotography #ParisCorner #ChicagoStyle #TheShowMagnifique #LuxuryFragrance #PopupEvent #BehindTheScenes',
+    format: '📸 Gallery Carousel · 10 Slides · Post at 1PM Tuesday June 24'
+  },
+  p19: {
+    phase: 4, color: '#0f7a3a',
+    eyebrow: 'PHASE 4 · JUNE 25 · TESTIMONIALS',
+    title: '"What Chicago said about The Show Magnifique."',
+    platforms: ['IG', 'TT'],
+    caption: `We let Chicago speak for itself. 🗣️
+
+Swipe / watch to see what our guests said about The Show Magnifique experience.
+
+[Compilation of guest video testimonials]
+
+Experience it yourself — The Show Magnifique is now available online.
+Link in bio. 🔴✨
+
+#WhatTheySaid #SocialProof #TheShowMagnifique #LuxuryFragrance`,
+    visual: '5–7 quick guest testimonials filmed at the event — people looking directly at camera saying 1–2 sentences about the scent or experience. Subtitled for silent viewing. Smooth cuts between guests. End with bottle close-up + "Shop now at IntenseOud.com" CTA. Keep energy high and authentic.',
+    hashtags: '#WhatTheySaid #SocialProof #TheShowMagnifique #LuxuryFragrance #CustomerReview #FragranceCommunity #Testimonial',
+    format: '💬 Testimonial Compilation · 30 seconds · Post at 6PM Wednesday June 25'
+  },
+  p20: {
+    phase: 4, color: '#0f7a3a',
+    eyebrow: 'PHASE 4 · JUNE 27 · ONLINE SHOP CTA',
+    title: '"You asked. It ships."',
+    platforms: ['IG', 'TT', 'FB'],
+    caption: `You asked. You can now order The Show Magnifique.
+
+Delivered to your door. Anywhere. 📦
+
+The bottle that stopped Chicago this weekend — now yours.
+
+"A fragrance that feels like the show is about to begin.
+Sweet. Bold. Impossible to ignore."
+
+Limited run. Shop the link in bio before it sells out. 🔴
+
+#ShopNow #LimitedEdition #IntenseOud #TheShowMagnifique #PerfumeOfTheYear`,
+    visual: 'Clean luxury product shot: the bottle on a dark gold-to-black gradient background, theatrical spotlight from above. No clutter. Just the bottle and its reflection. Text overlay: "THE SHOW MAGNIFIQUE · NOW AVAILABLE ONLINE" in Cinzel gold. This should feel like a luxury magazine ad.',
+    hashtags: '#ShopNow #LimitedEdition #IntenseOud #TheShowMagnifique #PerfumeOfTheYear #LuxuryFragrance #OnlineNow #ParisCorner',
+    format: '🛒 Product CTA Post · Post at 12PM Friday June 27'
+  },
+  p21: {
+    phase: 4, color: '#0f7a3a',
+    eyebrow: 'PHASE 4 · JUNE 29 · BRAND STORY',
+    title: '"From Dubai to Chicago."',
+    platforms: ['IG', 'FB'],
+    caption: `There's a story behind every fragrance.
+
+This one starts in Dubai —
+where the air carries oud and amber,
+where luxury isn't just a word, it's a standard.
+
+I grew up breathing that world.
+Intense Oud is my way of bringing it here — to Chicago — to you.
+
+The Show Magnifique isn't just a product.
+It's a bridge between two worlds.
+Between where I'm from and where I am.
+
+Thank you for letting us into your city.
+
+— Abdul Karim Ahmed, Founder, Intense Oud ✦
+
+#OurStory #IntenseOud #DubaiToChicago #FounderStory #LuxuryFragrance`,
+    visual: 'Authentic, personal. A photo of Abdul Karim at the store or event, or a beautiful split image: Dubai skyline on one side, Chicago skyline on the other, with the bottle at the center. Personal and emotional. This is a relationship-building post, not a sales post.',
+    hashtags: '#OurStory #IntenseOud #DubaiToChicago #FounderStory #LuxuryFragrance #MiddleEasternLuxury #ChicagoSmallBusiness #Founder',
+    format: '📖 Brand Story Post · Post at 11AM Sunday June 29'
+  },
+  p22: {
+    phase: 4, color: '#0f7a3a',
+    eyebrow: 'PHASE 4 · JUNE 30 · MONTH CLOSE & TEASE',
+    title: '"June was just Act One."',
+    platforms: ['IG', 'TT', 'FB'],
+    caption: `June was just Act One.
+
+Thank you to everyone who came, shared, bought, and believed.
+
+The Show Magnifique will return.
+
+And what comes next?
+Even more magnifique. ✨
+
+Follow @IntenseOud — you don't want to miss Act Two.
+
+#ActTwo #WhatsComing #IntenseOud #TheShowMagnifique #StayClose #ChicagoStyle`,
+    visual: 'Beautiful wrap image: hero bottle in a pool of gold light with a theatrical curtain backdrop — as if the show is ending but the stage is still lit. Text overlay: "ACT ONE — COMPLETE" then fade to "ACT TWO — COMING SOON." Mysterious and exciting.',
+    hashtags: '#ActTwo #WhatsComing #IntenseOud #TheShowMagnifique #StayClose #ChicagoStyle #JuneRecap #FragranceBrand',
+    format: '🔮 Month-End Teaser · Post at 6PM Monday June 30'
+  }
+};
+
+function showPhase(phase, btn) {
+  document.querySelectorAll('.phase-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (phase === 'all') {
+    document.querySelectorAll('.phase-section').forEach(s => s.classList.add('visible'));
+  } else {
+    document.querySelectorAll('.phase-section').forEach(s => s.classList.remove('visible'));
+    document.getElementById('sec-' + phase).classList.add('visible');
+  }
+}
+
+function openModal(id) {
+  const p = posts[id];
+  if (!p) return;
+  document.getElementById('mEyebrow').textContent = p.eyebrow;
+  document.getElementById('mTitle').textContent = p.title;
+  document.getElementById('modalBar').style.background = p.color;
+
+  const pl = document.getElementById('mPlatforms');
+  pl.innerHTML = '';
+  const map = { IG:'p-ig', TT:'p-tt', FB:'p-fb', YT:'p-yt' };
+  p.platforms.forEach(pf => {
+    const span = document.createElement('span');
+    span.className = 'platform-badge ' + (map[pf] || '');
+    span.textContent = pf;
+    pl.appendChild(span);
+  });
+
+  document.getElementById('mCaption').textContent = p.caption;
+  document.getElementById('mVisual').textContent = p.visual;
+  document.getElementById('mHashtags').textContent = p.hashtags;
+  document.getElementById('mFormat').textContent = p.format;
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
+</script>
+</body>
+</html>
