@@ -900,18 +900,32 @@ const pmMap = {'IG':'ig','TT':'tt','FB':'fb','YT':'yt'};
 function openModal(id){
   const D = getAllD();
   const d = D[id]; if(!d) return;
-  currentId = id;
+  currentId  = id;
+  isEditMode = false;
+
+  // Load any saved edits for this post
+  const edits = loadEdits();
+  const e = edits[id] || {};
+
   document.getElementById('mbar').style.background = d.c;
-  document.getElementById('mey').textContent  = d.e;
-  document.getElementById('mti').textContent  = d.t;
-  document.getElementById('mpf').innerHTML    = d.pl;
-  document.getElementById('mcap').textContent = d.cap;
-  document.getElementById('mvis').textContent = d.vis;
-  document.getElementById('mtip').textContent = d.tip;
-  document.getElementById('mhash').textContent= d.hash;
+  document.getElementById('mey').textContent   = d.e;
+  document.getElementById('mti').textContent   = e.t    || d.t;
+  document.getElementById('mpf').innerHTML     = d.pl;
+  document.getElementById('mcap').textContent  = e.cap  || d.cap;
+  document.getElementById('mvis').textContent  = e.vis  || d.vis;
+  document.getElementById('mtip').textContent  = e.tip  || d.tip;
+  document.getElementById('mhash').textContent = e.hash || d.hash;
   document.getElementById('mo').classList.add('open');
+  document.getElementById('edit-panel').innerHTML = '';
+  document.querySelectorAll('#mbod .ms').forEach(ms=>ms.style.display='');
   document.body.style.overflow='hidden';
+
+  // Reset edit button
+  const ebtn = document.getElementById('edit-btn');
+  if(ebtn){ ebtn.textContent='✏️ Edit Post'; ebtn.style.background=''; ebtn.style.color=''; }
+
   renderTrackPanel(id);
+  maybeShowEditBtn();
 }
 function closeModal(e){ if(e.target===document.getElementById('mo')) closeMD(); }
 function closeMD(){ document.getElementById('mo').classList.remove('open'); document.body.style.overflow=''; currentId=null; }
@@ -1257,10 +1271,10 @@ window.addEventListener('load', ()=>{
 
   // Apply any saved edits to card titles on load
   const _edits = loadEdits();
-  Object.keys(_edits).forEach(id=>{
-    const e = _edits[id];
-    if(e.t){ const el=document.querySelector(`#card-${id} .ctt`); if(el) el.textContent=e.t; }
-    if(e.cap){ const el=document.querySelector(`#card-${id} .cca`); if(el) el.textContent=e.cap; }
+  Object.keys(_edits).forEach(eid=>{
+    const ee = _edits[eid];
+    if(ee.t){   const el=document.getElementById('card-'+eid); if(el){ const t=el.querySelector('.ctt'); if(t) t.textContent=ee.t; } }
+    if(ee.cap){ const el=document.getElementById('card-'+eid); if(el){ const c=el.querySelector('.cca'); if(c) c.textContent=ee.cap; } }
   });
   // Show login
   document.getElementById('login-screen').classList.remove('hidden');
@@ -1354,41 +1368,44 @@ function renderEditPanel(id){
 function saveEdit(id){
   const edits = loadEdits();
   edits[id] = {
-    t:    document.getElementById('ed-title').value,
-    cap:  document.getElementById('ed-cap').value,
-    vis:  document.getElementById('ed-vis').value,
-    tip:  document.getElementById('ed-tip').value,
-    hash: document.getElementById('ed-hash').value,
-    editedBy:  SESSION.name,
-    editedAt:  new Date().toISOString(),
+    t:        document.getElementById('ed-title').value.trim(),
+    cap:      document.getElementById('ed-cap').value.trim(),
+    vis:      document.getElementById('ed-vis').value.trim(),
+    tip:      document.getElementById('ed-tip').value.trim(),
+    hash:     document.getElementById('ed-hash').value.trim(),
+    editedBy: SESSION.name,
+    editedAt: new Date().toISOString(),
   };
   saveEdits(edits);
 
-  // Show saved
-  const msg = document.getElementById('edit-saved-msg');
-  if(msg){ msg.style.display='block'; setTimeout(()=>{ msg.style.display='none'; },2000); }
+  const e = edits[id];
 
-  // Exit edit mode and refresh modal with new content
+  // Update modal view instantly
+  if(e.t)    document.getElementById('mti').textContent   = e.t;
+  if(e.cap)  document.getElementById('mcap').textContent  = e.cap;
+  if(e.vis)  document.getElementById('mvis').textContent  = e.vis;
+  if(e.tip)  document.getElementById('mtip').textContent  = e.tip;
+  if(e.hash) document.getElementById('mhash').textContent = e.hash;
+
+  // Update card on the calendar
+  const cardTitle = document.querySelector('#card-'+id+' .ctt');
+  const cardCap   = document.querySelector('#card-'+id+' .cca');
+  if(cardTitle && e.t)   cardTitle.textContent = e.t;
+  if(cardCap   && e.cap) cardCap.textContent   = e.cap;
+
+  // Exit edit mode
   isEditMode = false;
   const btn = document.getElementById('edit-btn');
   if(btn){ btn.textContent='✏️ Edit Post'; btn.style.background=''; btn.style.color=''; }
-  document.getElementById('edit-panel').innerHTML='';
+  document.getElementById('edit-panel').innerHTML = '';
   document.querySelectorAll('#mbod .ms').forEach(ms=>ms.style.display='');
 
-  // Re-render modal content with updated values
-  const D = getAllD();
-  const e = edits[id];
-  if(e.t)    document.getElementById('mti').textContent  = e.t;
-  if(e.cap)  document.getElementById('mcap').textContent = e.cap;
-  if(e.vis)  document.getElementById('mvis').textContent = e.vis;
-  if(e.tip)  document.getElementById('mtip').textContent = e.tip;
-  if(e.hash) document.getElementById('mhash').textContent= e.hash;
-
-  // Update card title on the calendar too
-  const cardTitle = document.querySelector(`#card-${id} .ctt`);
-  if(cardTitle && e.t) cardTitle.textContent = e.t;
-  const cardCap = document.querySelector(`#card-${id} .cca`);
-  if(cardCap && e.cap) cardCap.textContent = e.cap;
+  // Flash success banner in modal
+  const flash = document.createElement('div');
+  flash.style.cssText='background:#ECFDF5;border:1px solid #A7F3D0;border-radius:9px;padding:10px 14px;font-size:11px;font-weight:600;color:#065F46;text-align:center;margin-top:10px;';
+  flash.textContent = '✓ Post updated successfully!';
+  document.getElementById('mbod').appendChild(flash);
+  setTimeout(()=>{ flash.remove(); }, 2500);
 }
 
 // Edit storage
@@ -1400,24 +1417,7 @@ function escHtml(str){
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Patch openModal to apply edits and show edit button
-const _openModalBase = openModal;
-function openModal(id){
-  isEditMode = false;
-  _openModalBase(id);
-  // Apply any saved edits to the modal display
-  const edits = loadEdits();
-  const e = edits[id];
-  if(e){
-    if(e.t)    document.getElementById('mti').textContent   = e.t;
-    if(e.cap)  document.getElementById('mcap').textContent  = e.cap;
-    if(e.vis)  document.getElementById('mvis').textContent  = e.vis;
-    if(e.tip)  document.getElementById('mtip').textContent  = e.tip;
-    if(e.hash) document.getElementById('mhash').textContent = e.hash;
-  }
-  // Show/hide edit button based on role
-  setTimeout(maybeShowEditBtn, 50);
-}
+
 
 </script>
 </body>
