@@ -258,6 +258,7 @@ body{background:var(--iv);color:var(--tx);font-family:'Inter',sans-serif;}
       <div class="ms"><div class="msl">Visual Direction</div><div class="msv" id="mvis"></div></div>
       <div class="ms"><div class="msl">Pro Tip</div><div class="mst" id="mtip"></div></div>
       <div class="ms"><div class="msl">Hashtags</div><div class="msc" id="mhash" style="color:#B01020;background:rgba(176,16,32,0.04);"></div></div>
+      <div id="track-panel"></div>
     </div>
   </div>
 </div>
@@ -269,7 +270,7 @@ function showPhase(ph,btn){
   if(ph==='all'){document.querySelectorAll('.ps').forEach(s=>s.classList.add('vis'));}
   else{document.querySelectorAll('.ps').forEach(s=>s.classList.remove('vis'));document.getElementById('sec-'+ph).classList.add('vis');}
 }
-function openModal(id){
+function openModalOriginal(id){
   const d=D[id]; if(!d) return;
   document.getElementById('mbar').style.background=d.c;
   document.getElementById('mey').textContent=d.e;
@@ -561,17 +562,13 @@ function removeMember(id) {
 }
 
 // ── OVERRIDE openModal to include tracking panel ───────
-const _origOpenModal = openModal;
-function openModal(id) {
-  _origOpenModal(id);
-  // Inject tracking panel after modal opens
-  setTimeout(() => renderTrackPanel(id), 50);
+function openModal(id){
+  openModalOriginal(id);
+  setTimeout(() => renderTrackPanel(id), 80);
 }
 
 // Init on load
-document.addEventListener('DOMContentLoaded', () => {
-  updateDashboard();
-});
+window.addEventListener('load', () => { updateDashboard(); });
 </script>
 
 <!-- TEAM DRAWER OVERLAY -->
