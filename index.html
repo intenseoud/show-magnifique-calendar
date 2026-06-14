@@ -312,6 +312,34 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-si
   .drawer{width:100%;}
   .hi{gap:10px;}
 }
+
+/* ── EDIT MODE ── */
+.edit-btn{
+  display:none;padding:6px 14px;background:var(--gold);color:var(--hbg);
+  border:none;border-radius:8px;font-size:10px;font-weight:700;
+  font-family:'Cinzel',serif;letter-spacing:1.5px;cursor:pointer;
+  transition:all .2s;margin-left:auto;
+}
+.edit-btn:hover{background:#b8852e;}
+.edit-mode-banner{
+  background:linear-gradient(135deg,#FFFBEB,#FFF);
+  border:1.5px solid var(--gold);border-radius:10px;
+  padding:10px 14px;margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;font-size:11px;color:#92400E;
+}
+.edit-field{margin-bottom:12px;}
+.edit-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--tx3);margin-bottom:5px;display:block;}
+.edit-input{width:100%;padding:9px 11px;border:1.5px solid var(--border2);border-radius:9px;font-size:13px;font-family:'Inter',sans-serif;color:var(--tx);}
+.edit-input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,151,58,0.12);}
+.edit-textarea{width:100%;padding:9px 11px;border:1.5px solid var(--border2);border-radius:9px;font-size:12px;font-family:'Inter',sans-serif;color:var(--tx);min-height:90px;resize:vertical;line-height:1.6;}
+.edit-textarea:focus{outline:none;border-color:var(--gold);}
+.edit-actions{display:flex;gap:8px;margin-top:4px;}
+.edit-save-btn{flex:1;padding:10px;background:var(--p4);color:white;border:none;border-radius:9px;font-size:11px;font-weight:700;font-family:'Cinzel',serif;letter-spacing:1.5px;cursor:pointer;}
+.edit-save-btn:hover{background:#167a52;}
+.edit-cancel-btn{padding:10px 16px;background:var(--bg);color:var(--tx2);border:1px solid var(--border2);border-radius:9px;font-size:11px;cursor:pointer;}
+.edit-saved-msg{text-align:center;font-size:10px;color:var(--p4);font-weight:600;padding:5px;display:none;}
+.modal-view-mode, .modal-edit-mode{transition:all .2s;}
+
 </style>
 </head>
 <body>
@@ -455,6 +483,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-si
       <div class="mey" id="mey"></div>
       <div class="mti" id="mti"></div>
       <div class="mpf" id="mpf"></div>
+      <button class="edit-btn" id="edit-btn" onclick="toggleEditMode()">✏️ Edit Post</button>
     </div>
     <div class="mbod">
       <div class="ms"><span class="msl">Caption / Script</span><div class="msc" id="mcap"></div></div>
@@ -462,6 +491,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-si
       <div class="ms"><span class="msl">Pro Tip</span><div class="mst" id="mtip"></div></div>
       <div class="ms"><span class="msl">Hashtags</span><div class="msc" id="mhash" style="color:var(--cr);background:rgba(196,18,48,0.04);"></div></div>
       <div id="track-panel"></div>
+      <div id="edit-panel"></div>
     </div>
   </div>
 </div>
@@ -1224,9 +1254,171 @@ function removeMember(id){
 // INIT
 // ═══════════════════════════════════════════════════════════════════
 window.addEventListener('load', ()=>{
+
+  // Apply any saved edits to card titles on load
+  const _edits = loadEdits();
+  Object.keys(_edits).forEach(id=>{
+    const e = _edits[id];
+    if(e.t){ const el=document.querySelector(`#card-${id} .ctt`); if(el) el.textContent=e.t; }
+    if(e.cap){ const el=document.querySelector(`#card-${id} .cca`); if(el) el.textContent=e.cap; }
+  });
   // Show login
   document.getElementById('login-screen').classList.remove('hidden');
 });
+
+
+// ═══════════════════════════════════════════════════════════════════
+// EDIT MODE
+// ═══════════════════════════════════════════════════════════════════
+let isEditMode = false;
+
+// Show edit button only for admin/superadmin
+function maybeShowEditBtn(){
+  const btn = document.getElementById('edit-btn');
+  if(!btn) return;
+  btn.style.display = (SESSION.role==='superadmin'||SESSION.role==='admin') ? 'block' : 'none';
+}
+
+function toggleEditMode(){
+  isEditMode = !isEditMode;
+  const btn = document.getElementById('edit-btn');
+  if(isEditMode){
+    btn.textContent = '✕ Cancel Edit';
+    btn.style.background = '#FEE2E2';
+    btn.style.color = '#991B1B';
+    renderEditPanel(currentId);
+    // Hide view content
+    document.getElementById('mbod').querySelector('.ms') && 
+      document.querySelectorAll('#mbod .ms').forEach(ms=>ms.style.display='none');
+  } else {
+    btn.textContent = '✏️ Edit Post';
+    btn.style.background = '';
+    btn.style.color = '';
+    document.getElementById('edit-panel').innerHTML = '';
+    // Show view content
+    document.querySelectorAll('#mbod .ms').forEach(ms=>ms.style.display='');
+  }
+}
+
+function renderEditPanel(id){
+  const D = getAllD();
+  const d = D[id];
+  if(!d){ document.getElementById('edit-panel').innerHTML=''; return; }
+
+  // Get editable overrides from storage
+  const edits = loadEdits();
+  const e = edits[id] || {};
+
+  // Use stored edit if exists, else original
+  const cap  = e.cap  !== undefined ? e.cap  : (d.cap  || '');
+  const vis  = e.vis  !== undefined ? e.vis  : (d.vis  || '');
+  const tip  = e.tip  !== undefined ? e.tip  : (d.tip  || '');
+  const hash = e.hash !== undefined ? e.hash : (d.hash || '');
+  const title= e.t    !== undefined ? e.t    : (d.t    || '');
+
+  document.getElementById('edit-panel').innerHTML = `
+    <div style="margin-top:10px;">
+      <div class="edit-mode-banner">
+        ✏️ <strong>Edit Mode</strong> — Changes save separately. Original data is never deleted.
+      </div>
+
+      <div class="edit-field">
+        <span class="edit-label">Post Title / Hook</span>
+        <input class="edit-input" id="ed-title" value="${escHtml(title)}" />
+      </div>
+      <div class="edit-field">
+        <span class="edit-label">Caption / Script</span>
+        <textarea class="edit-textarea" id="ed-cap">${escHtml(cap)}</textarea>
+      </div>
+      <div class="edit-field">
+        <span class="edit-label">Visual Direction</span>
+        <textarea class="edit-textarea" id="ed-vis">${escHtml(vis)}</textarea>
+      </div>
+      <div class="edit-field">
+        <span class="edit-label">Pro Tip</span>
+        <textarea class="edit-textarea" id="ed-tip" style="min-height:60px;">${escHtml(tip)}</textarea>
+      </div>
+      <div class="edit-field">
+        <span class="edit-label">Hashtags</span>
+        <input class="edit-input" id="ed-hash" value="${escHtml(hash)}" />
+      </div>
+
+      <div class="edit-actions">
+        <button class="edit-cancel-btn" onclick="toggleEditMode()">Cancel</button>
+        <button class="edit-save-btn" onclick="saveEdit('${id}')">✓ Save Changes</button>
+      </div>
+      <div class="edit-saved-msg" id="edit-saved-msg">✓ Changes saved!</div>
+    </div>`;
+}
+
+function saveEdit(id){
+  const edits = loadEdits();
+  edits[id] = {
+    t:    document.getElementById('ed-title').value,
+    cap:  document.getElementById('ed-cap').value,
+    vis:  document.getElementById('ed-vis').value,
+    tip:  document.getElementById('ed-tip').value,
+    hash: document.getElementById('ed-hash').value,
+    editedBy:  SESSION.name,
+    editedAt:  new Date().toISOString(),
+  };
+  saveEdits(edits);
+
+  // Show saved
+  const msg = document.getElementById('edit-saved-msg');
+  if(msg){ msg.style.display='block'; setTimeout(()=>{ msg.style.display='none'; },2000); }
+
+  // Exit edit mode and refresh modal with new content
+  isEditMode = false;
+  const btn = document.getElementById('edit-btn');
+  if(btn){ btn.textContent='✏️ Edit Post'; btn.style.background=''; btn.style.color=''; }
+  document.getElementById('edit-panel').innerHTML='';
+  document.querySelectorAll('#mbod .ms').forEach(ms=>ms.style.display='');
+
+  // Re-render modal content with updated values
+  const D = getAllD();
+  const e = edits[id];
+  if(e.t)    document.getElementById('mti').textContent  = e.t;
+  if(e.cap)  document.getElementById('mcap').textContent = e.cap;
+  if(e.vis)  document.getElementById('mvis').textContent = e.vis;
+  if(e.tip)  document.getElementById('mtip').textContent = e.tip;
+  if(e.hash) document.getElementById('mhash').textContent= e.hash;
+
+  // Update card title on the calendar too
+  const cardTitle = document.querySelector(`#card-${id} .ctt`);
+  if(cardTitle && e.t) cardTitle.textContent = e.t;
+  const cardCap = document.querySelector(`#card-${id} .cca`);
+  if(cardCap && e.cap) cardCap.textContent = e.cap;
+}
+
+// Edit storage
+const EK = 'smcal_edits_v4';
+function loadEdits(){ try{ return JSON.parse(localStorage.getItem(EK)||'{}'); }catch(e){ return {}; } }
+function saveEdits(d){ localStorage.setItem(EK, JSON.stringify(d)); }
+
+function escHtml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Patch openModal to apply edits and show edit button
+const _openModalBase = openModal;
+function openModal(id){
+  isEditMode = false;
+  _openModalBase(id);
+  // Apply any saved edits to the modal display
+  const edits = loadEdits();
+  const e = edits[id];
+  if(e){
+    if(e.t)    document.getElementById('mti').textContent   = e.t;
+    if(e.cap)  document.getElementById('mcap').textContent  = e.cap;
+    if(e.vis)  document.getElementById('mvis').textContent  = e.vis;
+    if(e.tip)  document.getElementById('mtip').textContent  = e.tip;
+    if(e.hash) document.getElementById('mhash').textContent = e.hash;
+  }
+  // Show/hide edit button based on role
+  setTimeout(maybeShowEditBtn, 50);
+}
+
 </script>
 </body>
 </html>
